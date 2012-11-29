@@ -1,0 +1,46 @@
+<!-- LANGUAGES -->
+<div class="portal" role="navigation" id='p-lang'>
+	<h5>Languages</h5>
+	<div class="body">
+		<ul>
+			<li class="interwiki-ar"><a href="//ar.wikipedia.org/wiki/%D8%B5%D9%8A%D8%BA%D8%A9_%D8%A7%D9%84%D8%AA%D8%AD%D9%88%D9%8A%D9%84_%D8%A7%D9%84%D9%85%D9%88%D8%AD%D8%AF-8" title="صيغة التحويل الموحد-8" lang="ar" hreflang="ar">العربية</a></li>
+			<li class="interwiki-bg"><a href="//bg.wikipedia.org/wiki/UTF-8" title="UTF-8" lang="bg" hreflang="bg">Български</a></li>
+			<li class="interwiki-ca"><a href="//ca.wikipedia.org/wiki/UTF-8" title="UTF-8" lang="ca" hreflang="ca">Català</a></li>
+			<li class="interwiki-cs"><a href="//cs.wikipedia.org/wiki/UTF-8" title="UTF-8" lang="cs" hreflang="cs">Česky</a></li>
+			<li class="interwiki-da"><a href="//da.wikipedia.org/wiki/UTF-8" title="UTF-8" lang="da" hreflang="da">Dansk</a></li>
+			<li class="interwiki-de"><a href="//de.wikipedia.org/wiki/UTF-8" title="UTF-8" lang="de" hreflang="de">Deutsch</a></li>
+			<li class="interwiki-el"><a href="//el.wikipedia.org/wiki/UTF-8" title="UTF-8" lang="el" hreflang="el">Ελληνικά</a></li>
+			<li class="interwiki-es"><a href="//es.wikipedia.org/wiki/UTF-8" title="UTF-8" lang="es" hreflang="es">Español</a></li>
+			<li class="interwiki-eo"><a href="//eo.wikipedia.org/wiki/UTF-8" title="UTF-8" lang="eo" hreflang="eo">Esperanto</a></li>
+			<li class="interwiki-fa"><a href="//fa.wikipedia.org/wiki/%DB%8C%D9%88%D8%AA%DB%8C%E2%80%8C%D8%A7%D9%81-%DB%B8" title="یوتی‌اف-۸" lang="fa" hreflang="fa">فارسی</a></li>
+			<li class="interwiki-fr"><a href="//fr.wikipedia.org/wiki/UTF-8" title="UTF-8" lang="fr" hreflang="fr">Français</a></li>
+			<li class="interwiki-ko"><a href="//ko.wikipedia.org/wiki/UTF-8" title="UTF-8" lang="ko" hreflang="ko">한국어</a></li>
+			<li class="interwiki-hr"><a href="//hr.wikipedia.org/wiki/UTF-8" title="UTF-8" lang="hr" hreflang="hr">Hrvatski</a></li>
+			<li class="interwiki-it"><a href="//it.wikipedia.org/wiki/UTF-8" title="UTF-8" lang="it" hreflang="it">Italiano</a></li>
+			<li class="interwiki-he"><a href="//he.wikipedia.org/wiki/UTF-8" title="UTF-8" lang="he" hreflang="he">עברית</a></li>
+			<li class="interwiki-lv"><a href="//lv.wikipedia.org/wiki/UTF-8" title="UTF-8" lang="lv" hreflang="lv">Latviešu</a></li>
+			<li class="interwiki-lt"><a href="//lt.wikipedia.org/wiki/UTF-8" title="UTF-8" lang="lt" hreflang="lt">Lietuvių</a></li>
+			<li class="interwiki-hu"><a href="//hu.wikipedia.org/wiki/UTF-8" title="UTF-8" lang="hu" hreflang="hu">Magyar</a></li>
+			<li class="interwiki-ml"><a href="//ml.wikipedia.org/wiki/%E0%B4%AF%E0%B5%81.%E0%B4%9F%E0%B4%BF.%E0%B4%8E%E0%B4%AB%E0%B5%8D-8" title="യു.ടി.എഫ്-8" lang="ml" hreflang="ml">മലയാളം</a></li>
+			<li class="interwiki-ms"><a href="//ms.wikipedia.org/wiki/UTF-8" title="UTF-8" lang="ms" hreflang="ms">Bahasa Melayu</a></li>
+			<li class="interwiki-nl"><a href="//nl.wikipedia.org/wiki/UTF-8" title="UTF-8" lang="nl" hreflang="nl">Nederlands</a></li>
+			<li class="interwiki-ja"><a href="//ja.wikipedia.org/wiki/UTF-8" title="UTF-8" lang="ja" hreflang="ja">日本語</a></li>
+			<li class="interwiki-no"><a href="//no.wikipedia.org/wiki/UTF-8" title="UTF-8" lang="no" hreflang="no">Norsk (bokmål)‎</a></li>
+			<li class="interwiki-nn"><a href="//nn.wikipedia.org/wiki/UTF-8" title="UTF-8" lang="nn" hreflang="nn">Norsk (nynorsk)‎</a></li>
+			<li class="interwiki-pl"><a href="//pl.wikipedia.org/wiki/UTF-8" title="UTF-8" lang="pl" hreflang="pl">Polski</a></li>
+			<li class="interwiki-pt"><a href="//pt.wikipedia.org/wiki/UTF-8" title="UTF-8" lang="pt" hreflang="pt">Português</a></li>
+			<li class="interwiki-ru"><a href="//ru.wikipedia.org/wiki/UTF-8" title="UTF-8" lang="ru" hreflang="ru">Русский</a></li>
+			<li class="interwiki-sk"><a href="//sk.wikipedia.org/wiki/UTF-8" title="UTF-8" lang="sk" hreflang="sk">Slovenčina</a></li>
+			<li class="interwiki-sl"><a href="//sl.wikipedia.org/wiki/UTF-8" title="UTF-8" lang="sl" hreflang="sl">Slovenščina</a></li>
+			<li class="interwiki-sr"><a href="//sr.wikipedia.org/wiki/UTF-8" title="UTF-8" lang="sr" hreflang="sr">Српски / srpski</a></li>
+			<li class="interwiki-fi"><a href="//fi.wikipedia.org/wiki/Unicode#UTF-8" title="Unicode" lang="fi" hreflang="fi">Suomi</a></li>
+			<li class="interwiki-sv"><a href="//sv.wikipedia.org/wiki/UTF-8" title="UTF-8" lang="sv" hreflang="sv">Svenska</a></li>
+			<li class="interwiki-tr"><a href="//tr.wikipedia.org/wiki/UTF-8" title="UTF-8" lang="tr" hreflang="tr">Türkçe</a></li>
+			<li class="interwiki-uk"><a href="//uk.wikipedia.org/wiki/UTF-8" title="UTF-8" lang="uk" hreflang="uk">Українська</a></li>
+			<li class="interwiki-vi"><a href="//vi.wikipedia.org/wiki/UTF-8" title="UTF-8" lang="vi" hreflang="vi">Tiếng Việt</a></li>
+			<li class="interwiki-zh"><a href="//zh.wikipedia.org/wiki/UTF-8" title="UTF-8" lang="zh" hreflang="zh">中文</a></li>
+		</ul>
+	</div>
+</div>
+
+<!-- /LANGUAGES -->
