@@ -8,8 +8,10 @@ let ascii =
   s
 
 let sample_strings = [
-  "hello", "Hello, world", true;
-  "ascii", ascii, true;
+  "hello", "Hello, world", true, Some true;
+  "ascii", ascii, true, Some true;
+  "private-use-area", "bad \238\128\131 ugly \237\160\189\237\184\136",
+  true, Some false;
 ]
 
 let special_tests = [
@@ -52,17 +54,25 @@ let special_strings =
     s
   in
   List.map (
-    fun (name, a, valid) ->
-      (sprintf "special case (%s)" name, string_of_array a, valid))
+    fun (name, a, valid_utf8) ->
+      (sprintf "special case (%s)" name, string_of_array a, valid_utf8, None))
     special_tests
 
 let test_strings () =
   List.iter (
-    fun (name, s, valid) ->
-      if Utf8val.is_utf8 s = valid then
-        printf "OK %s\n%!" name
+    fun (name, s, valid_utf8, opt_valid_unicode) ->
+      if Utf8val.is_utf8 s = valid_utf8 then
+        printf "OK UTF-8 %s\n%!" name
       else
-        failwith ("Utf8val test " ^ name ^ " failed")
+        failwith ("Utf8val test " ^ name ^ " failed UTF-8 validation");
+      match opt_valid_unicode with
+          Some valid_unicode ->
+            if Utf8val.is_assigned_unicode s = valid_unicode then
+              printf "OK Unicode %s\n%!" name
+            else
+              failwith ("Utf8val test " ^ name ^ " failed Unicode validation")
+        | None ->
+            ()
   ) (sample_strings @ special_strings)
 
 let test_file fname =
@@ -77,7 +87,7 @@ let test_file fname =
     with End_of_file ->
       Buffer.contents buf
   in
-  if Utf8val.is_utf8 (load fname) then
+  if Utf8val.is_assigned_unicode (load fname) then
     printf "OK %s\n%!" fname
   else
     failwith (sprintf "File %s does not contain valid UTF-8" fname)
