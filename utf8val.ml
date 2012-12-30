@@ -145,24 +145,6 @@ let fold_left f acc s =
 
 let iter f s = fold_left (fun () x -> f x) () s
 
-let unicode_private_use_area x =
-  x >= 0xE000 && x <= 0xF8FF
-  || x >= 0xF0000 && x <= 0xFFFFD
-  || x >= 0x100000 && x <= 0x10FFFD
-
-let unicode_assigned x =
-  (x >= 0x00000 && x <= 0x13FFF
-   || x >= 0x16000 && x <= 0x16FFF
-   || x >= 0x1B000 && x <= 0x1BFFF
-   || x >= 0x1D000 && x <= 0x2BFFF
-   || x >= 0x2F000 && x <= 0x2FFFF
-   || x >= 0xE0000 && x <= 0xE0FFF)
-  && not (unicode_private_use_area x)
-
-let unicode_public x =
-  x >= 0x00000 && x <= 0xEFFFF
-  && not (unicode_private_use_area x)
-
 let is_unicode f s =
   let check x =
     if not (f x) then
@@ -175,8 +157,8 @@ let is_unicode f s =
       Exit
     | Malformed _ -> false
 
-let is_assigned_unicode s =
-  is_unicode unicode_assigned s
+let is_allowed_unicode s =
+  is_unicode Utf8uni.is_allowed s
 
-let is_public_unicode s =
-  is_unicode unicode_public s
+let is_allowed_and_assigned_unicode s =
+  is_unicode Utf8uni.is_allowed_and_assigned s

@@ -13,26 +13,27 @@ exception Malformed of int option * string
 
 val fold_left : ('a -> int -> 'a) -> 'a -> string -> 'a
   (** Like [List.fold_left], but iterate over the Unicode code points.
-      @raise [Malformed] if the input is malformed UTF-8 *)
+      @raise Malformed if the input is malformed UTF-8 *)
 
 val iter : (int -> unit) -> string -> unit
   (** Like [List.iter], but iterate over the Unicode code points.
-      @raise [Malformed] if the input is malformed UTF-8 *)
+      @raise Malformed if the input is malformed UTF-8 *)
 
-val is_assigned_unicode : string -> bool
+val is_allowed_unicode : string -> bool
   (** Check whether the string is valid UTF-8 and contains Unicode code points
-      assigned by the Unicode consortium
-      (assigned ranges within planes 0, 1, 2 and 14).
-
-      This filter allows any string that represents valid Unicode "today", but
-      exclude ranges that are not yet assigned.
-  *)
-
-val is_public_unicode : string -> bool
-  (** Check whether the string is valid UTF-8 and contains Unicode code points
-      that are not in private use areas
+      that are not forbidden and not in private use areas
       (all code points except private use areas).
 
       This filter allows any string that might represent valid Unicode
       now or in the future.
+  *)
+
+val is_allowed_and_assigned_unicode : string -> bool
+  (** Check whether the string is valid UTF-8 and contains Unicode code points
+      that are not forbidden, that are not in private use areas,
+      and that were assigned by the Unicode consortium
+      (assigned ranges within planes 0, 1, 2 and 14).
+
+      This filter allows any string that represents valid Unicode "today", but
+      exclude ranges that are not yet assigned.
   *)
