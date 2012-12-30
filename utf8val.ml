@@ -145,9 +145,9 @@ let fold_left f acc s =
 
 let iter f s = fold_left (fun () x -> f x) () s
 
-let is_unicode f s =
+let is_supported_unicode is_valid s =
   let check x =
-    if not (f x) then
+    if not (is_valid x) then
       raise Exit
   in
   try
@@ -158,7 +158,69 @@ let is_unicode f s =
     | Malformed _ -> false
 
 let is_allowed_unicode s =
-  is_unicode Utf8uni.is_allowed s
+  is_supported_unicode Utf8uni.is_allowed s
 
 let is_allowed_and_assigned_unicode s =
-  is_unicode Utf8uni.is_allowed_and_assigned s
+  is_supported_unicode Utf8uni.is_allowed_and_assigned s
+
+let add = Buffer.add_char
+let encode_char buf x =
+  if x <= 0x7F then
+    (* 7 *)
+    add buf (Char.chr x)
+  else if x <= 0x7FF then (
+    (* 5 + 6 *)
+    add buf (Char.chr (0b11000000 lor ((x lsr 6) land 0b00011111)));
+    add buf (Char.chr (0b10000000 lor (x         land 0b00111111)))
+  )
+  else if x <= 0xFFFF then (
+    (* 4 + 6 + 6 *)
+    add buf (Char.chr (0b11100000 lor ((x lsr 12) land 0b00001111)));
+    add buf (Char.chr (0b10000000 lor ((x lsr  6) land 0b00111111)));
+    add buf (Char.chr (0b10000000 lor (x          land 0b00111111)))
+  )
+  else if x <= 0x1FFFFF then (
+    (* 3 + 6 + 6 + 6 *)
+    add buf (Char.chr (0b11110000 lor ((x lsr 18) land 0b00000111)));
+    add buf (Char.chr (0b10000000 lor ((x lsr 12) land 0b00111111)));
+    add buf (Char.chr (0b10000000 lor ((x lsr  6) land 0b00111111)));
+    add buf (Char.chr (0b10000000 lor (x          land 0b00111111)));
+  )
+  else if x <= 0x3FFFFFF then (
+    (* 2 + 6 + 6 + 6 + 6 *)
+    add buf (Char.chr (0b11111000 lor ((x lsr 24) land 0b00000011)));
+    add buf (Char.chr (0b10000000 lor ((x lsr 18) land 0b00111111)));
+    add buf (Char.chr (0b10000000 lor ((x lsr 12) land 0b00111111)));
+    add buf (Char.chr (0b10000000 lor ((x lsr  6) land 0b00111111)));
+    add buf (Char.chr (0b10000000 lor (x          land 0b00111111)));
+  )
+  else (
+    assert (x <= 0x7FFFFFFF);
+    (* 1 + 6 + 6 + 6 + 6 + 6 *)
+    add buf (Char.chr (0b11111100 lor ((x lsr 30) land 0b00000001)));
+    add buf (Char.chr (0b10000000 lor ((x lsr 24) land 0b00111111)));
+    add buf (Char.chr (0b10000000 lor ((x lsr 18) land 0b00111111)));
+    add buf (Char.chr (0b10000000 lor ((x lsr 12) land 0b00111111)));
+    add buf (Char.chr (0b10000000 lor ((x lsr  6) land 0b00111111)));
+    add buf (Char.chr (0b10000000 lor (x          land 0b00111111)));
+  )
+
+
+let fix_unicode is_valid replace s =
+  let buf = Buffer.create (String.length s) in
+  try
+    iter (
+      fun x ->
+        encode_char buf (if is_valid x then x else replace x)
+    ) s;
+    Some (Buffer.contents buf)
+  with Malformed _ ->
+    None
+
+let default_replace _ = 0xFFFD
+
+let fix_allowed_unicode ?(replace = default_replace) s =
+  fix_unicode Utf8uni.is_allowed replace s
+
+let fix_allowed_and_assigned_unicode ?(replace = default_replace) s =
+  fix_unicode Utf8uni.is_allowed_and_assigned replace s

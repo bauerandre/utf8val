@@ -7,7 +7,7 @@ val is_utf8 : string -> bool
       or representable Unicode characters. *)
 
 exception Malformed of int option * string
-(** Exception raised by the [fold_left] and [iter].
+(** Exception raised by {!fold_left} and {!iter}.
     The first argument is the position where the error occurred,
     position in the string which comes as the second argument. *)
 
@@ -18,6 +18,10 @@ val fold_left : ('a -> int -> 'a) -> 'a -> string -> 'a
 val iter : (int -> unit) -> string -> unit
   (** Like [List.iter], but iterate over the Unicode code points.
       @raise Malformed if the input is malformed UTF-8 *)
+
+val is_supported_unicode : (int -> bool) -> string -> bool
+  (** In addition to UTF-8 validation, check the validity of
+      each code point using the given predicate. *)
 
 val is_allowed_unicode : string -> bool
   (** Check whether the string is valid UTF-8 and contains Unicode code points
@@ -37,3 +41,24 @@ val is_allowed_and_assigned_unicode : string -> bool
       This filter allows any string that represents valid Unicode "today", but
       exclude ranges that are not yet assigned.
   *)
+
+val fix_unicode : (int -> bool) -> (int -> int) -> string -> string option
+  (** [fix_unicode is_valid replace s] rewrites the given UTF-8 string [s],
+      replacing invalid code points using the [replace] function.
+      The return value is [None] if the input string is not
+      even properly UTF-8-encoded. *)
+
+val default_replace : int -> int
+  (** The default [replace] function. It always returns 0xfffd
+      which is the code point for the so-called replacement character. *)
+
+val fix_allowed_unicode :
+  ?replace:(int -> int) -> string -> string option
+  (** Specialized version of [fix_unicode], using {!Utf8uni.is_allowed}.
+      @param replace defaults to {!default_replace} *)
+
+val fix_allowed_and_assigned_unicode :
+  ?replace:(int -> int) -> string -> string option
+  (** Specialized version of [fix_unicode],
+      using {!Utf8uni.is_allowed_and_assigned}.
+      @param replace default to {!default_replace} *)
