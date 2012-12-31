@@ -67,7 +67,7 @@ let test_strings () =
         failwith ("Utf8val test " ^ name ^ " failed UTF-8 validation");
       match opt_valid_unicode with
           Some valid_unicode ->
-            if Utf8val.is_assigned_unicode s = valid_unicode then
+            if Utf8val.is_allowed_and_assigned_unicode s = valid_unicode then
               printf "OK Unicode %s\n%!" name
             else
               failwith ("Utf8val test " ^ name ^ " failed Unicode validation")
@@ -87,7 +87,7 @@ let test_file fname =
     with End_of_file ->
       Buffer.contents buf
   in
-  if Utf8val.is_assigned_unicode (load fname) then
+  if Utf8val.is_allowed_and_assigned_unicode (load fname) then
     printf "OK %s\n%!" fname
   else
     failwith (sprintf "File %s does not contain valid UTF-8" fname)

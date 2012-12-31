@@ -19,7 +19,8 @@ doc:
 	mkdir -p html
 	ocamldoc -html -d html utf8uni.mli utf8val.mli
 test:
-	ocamlopt -o test_utf8val utf8val.mli utf8val.ml test_utf8val.ml
+	ocamlopt -o test_utf8val \
+          utf8uni.mli utf8uni.ml utf8val.mli utf8val.ml test_utf8val.ml
 	./test_utf8val
 install:
 	ocamlfind install utf8val META \
