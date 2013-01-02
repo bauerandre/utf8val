@@ -1,5 +1,5 @@
 name = "utf8val"
 version = "1.0.0"
 description = "UTF-8 validator"
-archive(byte) = "utf8val.cma"
-archive(native) = "utf8val.cmxa"
+archive(byte) = "libutf8val.cma"
+archive(native) = "libutf8val.cmxa"

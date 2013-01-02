@@ -8,13 +8,13 @@ all: utf8uni.ml
 	ocamlc -c -g utf8uni.ml
 	ocamlc -c -g utf8val.mli
 	ocamlc -c -g utf8val.ml
-	ocamlc -a -g -o utf8val.cma utf8uni.cmo utf8val.cmo
+	ocamlc -a -g -o libutf8val.cma utf8uni.cmo utf8val.cmo
 opt:
 	ocamlc -c -g utf8uni.mli
 	ocamlopt -c -g utf8uni.ml
 	ocamlc -c -g utf8val.mli
 	ocamlopt -c -g utf8val.ml
-	ocamlopt -a -g -o utf8val.cmxa utf8uni.cmx utf8val.cmx
+	ocamlopt -a -g -o libutf8val.cmxa utf8uni.cmx utf8val.cmx
 doc:
 	mkdir -p html
 	ocamldoc -html -d html utf8uni.mli utf8val.mli
@@ -24,7 +24,7 @@ test:
 	./test_utf8val
 install:
 	ocamlfind install utf8val META \
-		$$(ls *.mli *.cm[ioxa] *.cmxa *.o *.a 2>/dev/null)
+          $$(ls utf*.mli utf*.cm[iox] utf*.o libutf* 2>/dev/null)
 uninstall:
 	ocamlfind remove utf8val
 clean:
