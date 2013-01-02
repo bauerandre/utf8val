@@ -14,6 +14,35 @@ let sample_strings = [
   true, Some false;
 ]
 
+let json_validate = [
+  "json-escaped-control", "\\u0000", true;
+  "json-unescaped-control", "\000", false;
+  "json-escaped-newline", "\\n", true;
+  "json-unescaped-newline", "\n", true;
+  "json-escaped-backslash", "\\\\", true;
+  "json-escaped-quote", "\\\"", true;
+]
+
+let json_fix = [
+  "json-hello", "hello", Some "hello";
+
+  "json-unescaped-utf-8",
+  "e, é, ệ, \xF0\x9F\x92\xA9",
+  Some "e, \xC3\xA9, \xE1\xBB\x87, \xF0\x9F\x92\xA9";
+
+  "json-escaped-utf-8",
+  "\\u0065, \\u00E9, \\u1ec7, \\uD83D\\uDCA9",
+  Some "e, \xC3\xA9, \xE1\xBB\x87, \xF0\x9F\x92\xA9";
+
+  "json-misc",
+  "\\\\, \\\", \\n, \\t, \\u000A, \\u0000, \x1F",
+  Some "\\\\, \\\", \\n, \\t, \\n, \\u0000, \\u001F";
+
+  "json-bad-escape", "\\zzzzzzz", None;
+
+  "json-fix-private-use-area", "[\xEE\x80\x80]", Some "[\xEF\xBF\xBD]";
+]
+
 let special_tests = [
   "a", [| 0b00000000 |], true;
   "b", [| 0b10000000 |], false;
@@ -92,9 +121,19 @@ let test_file fname =
   else
     failwith (sprintf "File %s does not contain valid UTF-8" fname)
 
+let test f l =
+  List.iter (
+    fun (name, arg, expected) ->
+      if f arg = expected then
+        printf "OK %s\n%!" name
+      else
+        failwith (sprintf "Test %s failed" name)
+  ) l
 
 let main () =
   test_strings ();
-  test_file "wikipedia-languages.utf8"
+  test_file "wikipedia-languages.utf8";
+  test Utf8val.is_json_compatible json_validate;
+  test Utf8val.fix_json_compatible json_fix
 
 let () = main ()

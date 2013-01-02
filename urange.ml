@@ -87,6 +87,18 @@ let assigned = [
   0xE0000, 0xE0FFF;
 ]
 
+let json_control_characters = [
+  0x00, 0x1F;
+]
+
+(* TAB, LF, CR, SP *)
+let json_whitespace = [
+  0x09, 0x0A;
+  0x0D, 0x0D;
+  0x20, 0x20;
+]
+
+
 let print_allowed oc =
   let a = make 0x110000 true in
   disallow a noncharacters;
@@ -104,10 +116,23 @@ let print_allowed_and_assigned oc =
   let ranges = extract_valid_ranges a in
   print_filter oc "is_allowed_and_assigned" ranges
 
+let print_json_compatible oc =
+  let a = make 0x110000 true in
+  disallow a noncharacters;
+  disallow a utf16_surrogate_pairs;
+  disallow a private_use_areas;
+  disallow a json_control_characters;
+  let ranges = extract_valid_ranges a in
+  print_filter oc "is_json_string_compatible" ranges;
+  allow a json_whitespace;
+  let ranges = extract_valid_ranges a in
+  print_filter oc "is_json_compatible" ranges
+
 let main () =
   let oc = stdout in
   fprintf oc "(* Auto-generated from urange.ml *)\n\n";
   print_allowed oc;
-  print_allowed_and_assigned oc
+  print_allowed_and_assigned oc;
+  print_json_compatible oc
 
 let () = main ()

@@ -72,7 +72,131 @@ let is_utf8 s =
 
 exception Malformed of int option * string
 
-let fold_left f acc s =
+type pos = int
+type code = int
+
+type esc = {
+  esc_char : char;
+  esc_reader : string -> pos ref -> code list;
+  escape : code -> string option;
+}
+
+exception Internal_error
+
+let hex c =
+  match c with
+      '0'..'9' -> Char.code c - Char.code '0'
+    | 'a'..'f' -> Char.code c - Char.code 'a' + 10
+    | 'A'..'F' -> Char.code c - Char.code 'A' + 10
+    | _ -> raise Internal_error
+
+let to_hexcode x =
+  if x < 0 || x > 15 then raise Internal_error
+  else if x < 10 then
+    Char.code '0' + x
+  else
+    Char.code 'A' + x - 10
+
+let code_of_surrogate_pair i j =
+  let high10 = i - 0xD800 in
+  let low10 = j - 0xDC00 in
+  0x10000 + ((high10 lsl 10) lor low10)
+
+let unsafe_hex4 s p =
+  (hex s.[p] lsl 12)
+  lor (hex s.[p+1] lsl 8)
+  lor (hex s.[p+2] lsl 4)
+  lor hex s.[p+3]
+
+let finish_surrogate_pair x s p =
+  if p + 5 >= String.length s || s.[p] <> '\\' || s.[p+1] <> 'u' then
+    raise (Malformed (Some p, s))
+  else
+    let p = p + 2 in
+    let y = unsafe_hex4 s p in
+    if y >= 0xDC00 && y <= 0xDFFF then
+      code_of_surrogate_pair x y
+    else
+      raise (Malformed (Some p, s))
+
+let json_esc_reader s pos =
+  let len = String.length s in
+  let p = !pos in
+  if p = len then
+    raise (Malformed (Some p, s))
+  else
+    match s.[p] with
+      | 'b' | 't' | 'n' | 'f' | 'r' | '\"' -> [0x5C]
+      | '\\' -> incr pos; [0x5C; 0x5C]
+      | 'u' ->
+          (let p = p + 1 in
+           try
+             if p + 3 >= len then
+               raise Internal_error
+             else
+               let x = unsafe_hex4 s p in
+               let code =
+                 if x >= 0xD800 && x <= 0xDBFF then (
+                   let code = finish_surrogate_pair x s (p+4) in
+                   pos := p + 10;
+                   code
+                 )
+                 else (
+                   pos := p + 4;
+                   x
+                 )
+               in
+               match code with
+                 | 0x08 -> [0x5C; 0x62] (* \b *)
+                 | 0x09 -> [0x5C; 0x74] (* \t *)
+                 | 0x0A -> [0x5C; 0x6E] (* \n *)
+                 | 0x0C -> [0x5C; 0x66] (* \f *)
+                 | 0x0D -> [0x5C; 0x72] (* \r *)
+                 | 0x22 -> [0x5C; 0x22] (* \ double quote *)
+                 | 0x5C -> [0x5C; 0x5C] (* \\ *)
+                 | _ ->
+                     if code <= 0x1F then [
+                       0x5C; 0x75; (* \u *) 0x30; 0x30; (* 00 *)
+                       to_hexcode (code lsr 4); to_hexcode (code land 0x0F)
+                     ]
+                     else
+                       [code]
+
+           with Internal_error -> raise (Malformed (Some p, s))
+          )
+      | _ ->
+          raise (Malformed (Some p, s))
+
+(* Escape raw control characters *)
+let escape_json x =
+  match x with
+    | 0x09 | 0x0A | 0x0D ->
+        (* control characters that are whitespace;
+           can't fix if they're within string literals *)
+        None
+    | _ ->
+        if x <= 0x1F then
+          (* control characters that must be escaped (in string literals) *)
+          Some (Printf.sprintf "\\u00%02X" x)
+        else
+          (* other characters will be encoded in UTF-8 *)
+          None
+
+let json_esc = {
+  esc_char = '\\';
+  esc_reader = json_esc_reader;
+  escape = escape_json;
+}
+
+let no_esc = {
+  esc_char = '\xFF';
+  esc_reader = (fun s pos -> assert false);
+  escape = (fun _ -> None);
+}
+
+let fold_left ?(esc = no_esc) f acc s =
+
+  let { esc_char } = esc in
 
   let check b =
     if not b then
@@ -92,13 +216,22 @@ let fold_left f acc s =
 
   let next s i = Char.code (String.unsafe_get s (i+1)) in
 
+  (* pos is updated only for esc_reader *)
+  let pos = ref 0 in
+
   let rec loop f acc s len i =
     if i = len then acc
     else
       let x = Char.code (String.unsafe_get s i) in
       if x lsr 7 = 0 then (
-        let acc = f acc x in
-        loop f acc s len (i+1)
+        if x = Char.code esc_char then (
+          pos := i+1;
+          let acc = List.fold_left f acc (esc.esc_reader s pos) in
+          loop f acc s len !pos
+        )
+        else
+          let acc = f acc x in
+          loop f acc s len (i+1)
       )
       else if x lsr 5 = 0b110 then (
         check (i+1 < len && x land 0b00011110 <> 0);
@@ -143,25 +276,28 @@ let fold_left f acc s =
   in
   loop f acc s (String.length s) 0
 
-let iter f s = fold_left (fun () x -> f x) () s
+let iter ?esc f s = fold_left ?esc (fun () x -> f x) () s
 
-let is_supported_unicode is_valid s =
+let is_supported_unicode ?esc is_valid s =
   let check x =
     if not (is_valid x) then
       raise Exit
   in
   try
-    iter check s;
+    iter ?esc check s;
     true
   with
       Exit
     | Malformed _ -> false
 
-let is_allowed_unicode s =
-  is_supported_unicode Utf8uni.is_allowed s
+let is_allowed_unicode ?esc s =
+  is_supported_unicode ?esc Utf8uni.is_allowed s
 
-let is_allowed_and_assigned_unicode s =
-  is_supported_unicode Utf8uni.is_allowed_and_assigned s
+let is_allowed_and_assigned_unicode ?esc s =
+  is_supported_unicode ?esc Utf8uni.is_allowed_and_assigned s
+
+let is_json_compatible s =
+  is_supported_unicode ~esc:json_esc Utf8uni.is_json_compatible s
 
 let add = Buffer.add_char
 let encode_char buf x =
@@ -209,22 +345,33 @@ let encode_char buf x =
     add buf (Char.chr (0b10000000 lor (x          land 0b00111111)));
   )
 
+let default_replace _ = 0xFFFD
 
-let fix_unicode is_valid replace s =
+let fix_unicode ?esc ?(replace = default_replace) is_valid s =
   let buf = Buffer.create (String.length s) in
+  let escape =
+    match esc with
+        None -> (fun _ -> None)
+      | Some { escape } -> escape
+  in
   try
-    iter (
+    iter ?esc (
       fun x ->
-        encode_char buf (if is_valid x then x else replace x)
+        match escape x with
+            None ->
+              encode_char buf (if is_valid x then x else replace x)
+          | Some escaped ->
+              Buffer.add_string buf escaped
     ) s;
     Some (Buffer.contents buf)
   with Malformed _ ->
     None
 
-let default_replace _ = 0xFFFD
+let fix_allowed_unicode ?esc ?replace s =
+  fix_unicode ?esc ?replace Utf8uni.is_allowed s
 
-let fix_allowed_unicode ?(replace = default_replace) s =
-  fix_unicode Utf8uni.is_allowed replace s
+let fix_allowed_and_assigned_unicode ?esc ?replace s =
+  fix_unicode ?esc ?replace Utf8uni.is_allowed_and_assigned s
 
-let fix_allowed_and_assigned_unicode ?(replace = default_replace) s =
-  fix_unicode Utf8uni.is_allowed_and_assigned replace s
+let fix_json_compatible ?replace s =
+  fix_unicode ~esc:json_esc ?replace Utf8uni.is_json_compatible s
