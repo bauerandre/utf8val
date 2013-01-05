@@ -35,8 +35,8 @@ let json_fix = [
   Some "e, \xC3\xA9, \xE1\xBB\x87, \xF0\x9F\x92\xA9";
 
   "json-misc",
-  "\\\\, \\\", \\n, \\t, \\u000A, \\u0000, \x1F",
-  Some "\\\\, \\\", \\n, \\t, \\n, \\u0000, \\u001F";
+  "\\\\, \\\", \\/, \\n, \\t, \\u000A, \\u0000, \x1F",
+  Some "\\\\, \\\", /, \\n, \\t, \\n, \\u0000, \\u001F";
 
   "json-bad-escape", "\\zzzzzzz", None;
 

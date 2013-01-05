@@ -127,6 +127,7 @@ let json_esc_reader s pos =
   else
     match s.[p] with
       | 'b' | 't' | 'n' | 'f' | 'r' | '\"' -> [0x5C]
+      | '/' -> [] (* remove the escape since it's allowed but not needed *)
       | '\\' -> incr pos; [0x5C; 0x5C]
       | 'u' ->
           (let p = p + 1 in
@@ -153,6 +154,7 @@ let json_esc_reader s pos =
                  | 0x0C -> [0x5C; 0x66] (* \f *)
                  | 0x0D -> [0x5C; 0x72] (* \r *)
                  | 0x22 -> [0x5C; 0x22] (* \ double quote *)
+               (*| 0x2F -> [0x5C; 0x2F] (* / *) (*not required*) *)
                  | 0x5C -> [0x5C; 0x5C] (* \\ *)
                  | _ ->
                      if code <= 0x1F then [
