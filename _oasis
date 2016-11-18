@@ -1,0 +1,35 @@
+OASISFormat: 0.4
+Name: utf8val
+Version: v1.0.0
+OCamlVersion: >= 4.02
+Synopsis: utf8val
+Authors: Skydeck
+License: BSD-3-Clause
+AlphaFeatures: ocamlbuild_more_args, compiled_setup_ml, stdfiles_markdown
+Plugins: META (0.4), StdFiles (0.4), DevFiles (0.4)
+BuildTools: ocamlbuild
+XOCamlbuildExtraArgs: "-I +threads"
+
+Executable "urange"
+  Path: src
+  MainIs: urange.ml
+  CompiledObject: best
+  Install: false
+
+Library utf8val
+  FindLibName: utf8val
+  Path: src/
+  Modules:
+    Utf8val,
+    Utf8uni
+
+Document "utf8val_api"  
+  Type: ocamlbuild (0.4)
+  BuildTools+: ocamldoc
+  Title: API reference for Utf8val
+  Install: false
+  XOCamlbuildPath: .
+  XOCamlbuildExtraArgs+:
+    "-I +threads -use-menhir -docflags '-colorize-code -short-functors -charset utf-8 -keep-code'"
+  XOCamlbuildLibraries:
+    utf8val
